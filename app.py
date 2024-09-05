@@ -38,6 +38,47 @@ class Category(db.Model):
     name = db.Column(db.String(50), nullable=False)
 
 
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    error = None
+    if request.method == 'POST':
+        session['username']= request.form['username']
+        session['password']= request.form['password']
 
+        user = User.query.filter_by(username=session['username']).first()
+
+        if user is None or not check_password_hash(user.password_hash, session['password']):
+            error = 'Incorrect username or password. Please try again.'
+        else:
+            session['username'] = user.username
+            return redirect(url_for('index'))
+
+    return render_template('login.html', error=error)
+
+
+
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    error = None
+    if request.method == 'POST':
+        username =  request.form['username']
+        email = request.form['email']
+        password = request.form['password']
+
+
+        # check if the user already exists
+        existing_user = User.query.filter_by(username=username).first()
+        if existing_user is None:
+            password_hash = generate_password_hash(password)
+            new_user = User(username=username,email=email, password_hash=password_hash)
+            db.session.add(new_user)
+            db.session.commit()
+            return redirect(url_for('login'))
+
+        else:
+            error = 'The username already exists. Please try again.'
+
+    return render_template('register.html', error=error)
     
     
