@@ -97,6 +97,42 @@ def logout():
     session.pop('password', None)
     return redirect(url_for('login'))
 
+
+@app.route('/add_book', methods=['GET', 'POST'])
+def add_book():
+    if request.method == 'POST':
+        title = request.form['title']
+        author_name = request.form['author']
+        author_email = request.form['email']
+        category_name = request.form['category']
+
+        # Check if the author already exists
+        author = Author.query.filter_by(email=author_email).first()
+        if not author:
+            author = Author(name=author_name, email=author_email)
+            db.session.add(author)
+            db.session.commit()
+
+
+        # Check if the category already exists
+        category = Category.query.filter_by(name=category_name).first()
+        if not category:
+            category = Category(name=category_name)
+            db.session.add(category)
+            db.session.commit()
+
+        # Create the new book
+        new_book = Book(title=title, author_id=author.idAuthor, category_id=category.idCategory)
+        db.session.add(new_book)
+        db.session.commit()
+
+        return redirect(url_for('index'))
+
+    elif request.method == 'GET':
+        authors = Author.query.all()
+        categories = Category.query.all()
+        return render_template('add.html', authors=authors, categories=categories)
+
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
