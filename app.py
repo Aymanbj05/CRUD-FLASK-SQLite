@@ -81,6 +81,14 @@ def register():
 
     return render_template('register.html', error=error)
     
+@app.route('/')
+def index():
+    if 'username' and 'password' in session:
+        username = session['username']
+        password = session['password']
+        books = Book.query.all()
+        return render_template('index.html', books=books)
+    return redirect(url_for('login'))
 
 
 if __name__ == '__main__':
