@@ -183,6 +183,15 @@ def edit_book(id):
     return render_template('edit.html', book=book, authors=authors, categories=categories)
 
 
+@app.route('/delete_book/<int:id>', methods=['POST'])
+def delete_book(id):
+    book= Book.query.get_or_404(id)
+    db.session.delete(book)
+    db.session.commit()
+    return redirect(url_for('index'))
+
+
+
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
