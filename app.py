@@ -91,6 +91,12 @@ def index():
     return redirect(url_for('login'))
 
 
+@app.route('/logout', methods=['POST'])
+def logout():
+    session.pop('username', None)
+    session.pop('password', None)
+    return redirect(url_for('login'))
+
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
