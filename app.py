@@ -133,6 +133,56 @@ def add_book():
         categories = Category.query.all()
         return render_template('add.html', authors=authors, categories=categories)
 
+
+@app.route('/edit_book/<int:id>', methods=['GET', 'POST'])
+def edit_book(id):
+    book = Book.query.get_or_404(id)  # Récupère le livre avec l'ID donné
+    if request.method == 'POST':
+        # Récupère les valeurs du formulaire
+        book.title = request.form.get('title')
+        book.author_id = request.form.get('author_id')
+        book.category_id = request.form.get('category_id')
+
+        # Récupère les informations de l'auteur depuis le formulaire
+        author_name = request.form.get('author_name')
+        author_email = request.form.get('author_email')
+        author_id = request.form.get('author_id')
+        category_name = request.form.get('category_name')
+        category_id = request.form.get('category_id')
+
+
+        # Cherche l'auteur existant ou crée un nouveau
+        author = Author.query.get(author_id)
+        category= Category.query.get(book.category_id)
+        if author and category:
+            author.name = author_name
+            author.email = author_email
+            category.name = category_name
+        else:
+            author = Author(name=author_name, email=author_email)
+            category = Category(name=category_name)
+            db.session.add(category)
+            db.session.add(author)
+
+
+
+        # Met à jour la relation auteur du livre
+        book.author = author
+        book.category = category
+
+        # Enregistre les modifications dans la base de données
+        db.session.commit()
+
+        # Redirige vers la page d'index
+        return redirect(url_for('index'))
+
+    # Récupère les données pour pré-remplir le formulaire
+    authors = Author.query.all()
+    categories = Category.query.all()
+
+    return render_template('edit.html', book=book, authors=authors, categories=categories)
+
+
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
